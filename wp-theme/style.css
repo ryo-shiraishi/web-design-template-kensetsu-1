@@ -1,0 +1,68 @@
+/*
+Theme Name: 〇〇建築テーマ
+Theme URI: https://example.com/
+Author: 〇〇建築株式会社
+Author URI: https://example.com/
+Description: 建設会社向けWordPressテーマ。自然素材とアナログの温もりを表現したデザイン。
+Version: 1.0.0
+Requires at least: 6.0
+Requires PHP: 8.0
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: kensetsu-theme
+Tags: construction, japanese, one-page
+*/
+
+/* アニメーション */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+[data-animate].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-animate-delay-1] { transition-delay: 0.2s; }
+[data-animate-delay-2] { transition-delay: 0.4s; }
+
+[data-hero-text] {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+[data-hero-text].is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+[data-hero-img] {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 1.2s ease-out, transform 1.2s ease-out 0.2s;
+}
+
+[data-hero-img].is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 背景グリッドパターン（マップダミー） */
+.grid-pattern {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><rect width='20' height='20' fill='none' stroke='%23000' stroke-width='1' opacity='0.5'/></svg>");
+  background-size: 20px 20px;
+  opacity: 0.1;
+  position: absolute;
+  inset: 0;
+}
+
+/* カスタムフォントサイズ */
+.text-6xl { font-size: 3.75rem; line-height: 1.4; }
+
+/* チェックボックス */
+input[type="checkbox"] {
+  accent-color: #4f6a52;
+}
