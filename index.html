@@ -1,13 +1,681 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>〇〇建築株式会社 | 木の香る家づくり</title>
+  <meta name="description" content="創業40年、地域に根ざした建築会社。注文住宅・リノベーション・アフターメンテナンスまで。職人の手仕事で理想の住まいをカタチにします。">
 
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=Noto+Serif+JP:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS v4 Browser CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary-brown: #5c4d44;
+      --color-primary-light: #f5f2ed;
+      --color-accent-green:  #4f6a52;
+      --color-text-main:     #2d2622;
+      --color-text-muted:    #6b635e;
+      --font-serif: "Noto Serif JP", serif;
+      --font-sans:  "Noto Sans JP", sans-serif;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-primary-light);
+      color: var(--color-text-main);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, h5, h6, .font-serif {
+      font-family: var(--font-serif);
+    }
+
+    ::selection {
+      background-color: var(--color-accent-green);
+      color: #fff;
+    }
+
+    .text-balance { text-wrap: balance; }
+
+    /* ── スクロールアニメーション ── */
+    [data-fade] {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+    [data-fade].delay-1 { transition-delay: 0.2s; }
+    [data-fade].delay-2 { transition-delay: 0.4s; }
+    [data-fade].visible  { opacity: 1; transform: none; }
+
+    [data-hero-text] {
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: opacity 1s ease-out, transform 1s ease-out;
+    }
+    [data-hero-text].visible { opacity: 1; transform: none; }
+
+    [data-hero-img] {
+      opacity: 0;
+      transform: scale(0.95);
+      transition: opacity 1.2s ease-out 0.2s, transform 1.2s ease-out 0.2s;
+    }
+    [data-hero-img].visible { opacity: 1; transform: scale(1); }
+
+    /* ── モバイルメニュー ── */
+    #mobile-nav {
+      display: none;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.35s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+    #mobile-nav.open {
+      display: flex;
+      max-height: 400px;
+      opacity: 1;
+    }
+
+    /* ── マップグリッドパターン ── */
+    .map-grid {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><rect width='20' height='20' fill='none' stroke='%23000' stroke-width='1' opacity='0.5'/></svg>");
+      background-size: 20px 20px;
+    }
+
+    /* ── フォーム送信完了バナー ── */
+    #form-success {
+      display: none;
+    }
+    #form-success.show {
+      display: block;
+    }
+
+    /* チェックボックスカラー */
+    input[type="checkbox"] { accent-color: #4f6a52; }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+<!-- ════════════════════════════════════════
+     ヘッダー / ナビゲーション
+════════════════════════════════════════ -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#f5f2ed]/90 backdrop-blur-md border-b border-primary-brown/10">
+  <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+
+    <!-- ロゴ -->
+    <a href="#" class="text-2xl font-serif tracking-widest text-primary-brown">
+      〇〇建築株式会社
+    </a>
+
+    <!-- デスクトップメニュー -->
+    <nav class="hidden md:flex items-center gap-10" aria-label="メインメニュー">
+      <a href="#services" class="text-sm tracking-widest hover:text-accent-green transition-colors">事業概要</a>
+      <a href="#company"  class="text-sm tracking-widest hover:text-accent-green transition-colors">会社概要</a>
+      <a href="#access"   class="text-sm tracking-widest hover:text-accent-green transition-colors">アクセス</a>
+      <a href="#contact"  class="px-6 py-3 bg-primary-brown text-white text-sm tracking-widest hover:bg-accent-green transition-colors rounded-sm">
+        無料で相談・資料請求
+      </a>
+    </nav>
+
+    <!-- ハンバーガーボタン（モバイル） -->
+    <button
+      id="menu-btn"
+      class="md:hidden p-2 text-primary-brown"
+      aria-label="メニューを開く"
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+    >
+      <!-- ハンバーガーアイコン -->
+      <svg id="icon-menu"  xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <line x1="4" y1="6"  x2="20" y2="6"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+      <!-- ×アイコン -->
+      <svg id="icon-close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="hidden">
+        <line x1="18" y1="6"  x2="6"  y2="18"/>
+        <line x1="6"  y1="6"  x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- モバイルメニュー -->
+  <nav id="mobile-nav" class="md:hidden bg-primary-light border-b border-primary-brown/10 px-6 py-4 flex-col gap-4" aria-label="モバイルメニュー">
+    <a href="#services" class="py-2 tracking-widest text-text-main hover:text-accent-green transition-colors">事業概要</a>
+    <a href="#company"  class="py-2 tracking-widest text-text-main hover:text-accent-green transition-colors">会社概要</a>
+    <a href="#access"   class="py-2 tracking-widest text-text-main hover:text-accent-green transition-colors">アクセス</a>
+    <a href="#contact"  class="py-3 mt-2 text-center bg-primary-brown text-white tracking-widest rounded-sm hover:bg-accent-green transition-colors">
+      無料で相談・資料請求
+    </a>
+  </nav>
+</header>
+
+
+<main>
+
+<!-- ════════════════════════════════════════
+     ヒーローセクション
+════════════════════════════════════════ -->
+<section class="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden px-6">
+  <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+
+    <!-- テキスト -->
+    <div data-hero-text class="relative z-10">
+      <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl leading-[1.4] text-primary-brown mb-8 text-balance">
+        心から安らげる、<br>木の香る家づくり。
+      </h1>
+      <p class="text-text-muted leading-relaxed mb-10 max-w-md text-sm md:text-base">
+        創業40年、〇〇市と共に歩む。<br>
+        職人の手仕事で、あなたの理想をカタチにします。
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <a href="#contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent-green text-white tracking-widest hover:opacity-90 transition-all rounded-sm shadow-sm group">
+          無料で相談・資料請求
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="group-hover:translate-x-1 transition-transform">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- 画像 -->
+    <div data-hero-img class="relative aspect-[4/5] md:aspect-square lg:aspect-[4/3] rounded-sm overflow-hidden shadow-2xl">
+      <img
+        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80"
+        alt="木の温もりを感じる家の中"
+        class="object-cover w-full h-full"
+        loading="eager"
+      >
+      <div class="absolute inset-0 border border-black/10 rounded-sm pointer-events-none"></div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     事業概要セクション
+════════════════════════════════════════ -->
+<section id="services" class="py-24 bg-white px-6">
+  <div class="max-w-7xl mx-auto">
+
+    <div data-fade class="text-center mb-16">
+      <span class="text-accent-green text-xs font-bold tracking-[0.2em] uppercase block mb-3">Services</span>
+      <h2 class="font-serif text-3xl md:text-4xl text-primary-brown">私たちができること</h2>
+      <div class="w-12 h-px bg-primary-brown mx-auto mt-6"></div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
+
+      <!-- 注文住宅 -->
+      <article data-fade class="group">
+        <div class="aspect-[4/3] rounded-sm overflow-hidden mb-6 bg-primary-light relative">
+          <img
+            src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
+            alt="注文住宅"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            loading="lazy"
+          >
+          <div class="absolute inset-0 bg-primary-brown/10 group-hover:bg-transparent transition-colors duration-500 pointer-events-none"></div>
+        </div>
+        <div class="flex items-center gap-4 mb-4">
+          <div class="p-3 bg-primary-light rounded-full text-primary-brown">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <h3 class="font-serif text-2xl text-primary-brown">注文住宅</h3>
+        </div>
+        <p class="text-sm text-text-muted leading-relaxed pl-16">
+          住むほどに愛着がわく、自然素材にこだわった家づくりをご提案します。
+        </p>
+      </article>
+
+      <!-- リノベーション -->
+      <article data-fade class="delay-1 group">
+        <div class="aspect-[4/3] rounded-sm overflow-hidden mb-6 bg-primary-light relative">
+          <img
+            src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=800&q=80"
+            alt="リノベーション"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            loading="lazy"
+          >
+          <div class="absolute inset-0 bg-primary-brown/10 group-hover:bg-transparent transition-colors duration-500 pointer-events-none"></div>
+        </div>
+        <div class="flex items-center gap-4 mb-4">
+          <div class="p-3 bg-primary-light rounded-full text-primary-brown">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="m15 12-8.5 8.5c-.83.83-.83 2.17 0 3 .83.83 2.17.83 3 0L18 12"/>
+              <path d="M17.64 15 22 10.64"/>
+              <path d="m20.41 6.41-2.83-2.83a2 2 0 0 0-2.83 0L13 5.34l4.66 4.66 2.75-2.75a2 2 0 0 0 0-2.84z"/>
+            </svg>
+          </div>
+          <h3 class="font-serif text-2xl text-primary-brown">リノベーション</h3>
+        </div>
+        <p class="text-sm text-text-muted leading-relaxed pl-16">
+          受け継がれた想いはそのままに、現代の暮らしに合わせた快適な住空間へ再生します。
+        </p>
+      </article>
+
+      <!-- アフターメンテナンス -->
+      <article data-fade class="delay-2 group">
+        <div class="aspect-[4/3] rounded-sm overflow-hidden mb-6 bg-primary-light relative">
+          <img
+            src="https://images.unsplash.com/photo-1504307651254-35680f356f11?auto=format&fit=crop&w=800&q=80"
+            alt="アフターメンテナンス"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            loading="lazy"
+          >
+          <div class="absolute inset-0 bg-primary-brown/10 group-hover:bg-transparent transition-colors duration-500 pointer-events-none"></div>
+        </div>
+        <div class="flex items-center gap-4 mb-4">
+          <div class="p-3 bg-primary-light rounded-full text-primary-brown">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h3 class="font-serif text-2xl text-primary-brown">アフターメンテナンス</h3>
+        </div>
+        <p class="text-sm text-text-muted leading-relaxed pl-16">
+          建ててからが本当のお付き合い。地域密着だからこそできる迅速なサポート体制。
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     会社概要セクション
+════════════════════════════════════════ -->
+<section id="company" class="py-24 px-6 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-1/2 h-full bg-primary-brown/5 -z-10 rounded-l-[100px] hidden md:block" aria-hidden="true"></div>
+  <div class="max-w-4xl mx-auto">
+
+    <div data-fade class="text-center mb-16">
+      <span class="text-accent-green text-xs font-bold tracking-[0.2em] uppercase block mb-3">Company</span>
+      <h2 class="font-serif text-3xl md:text-4xl text-primary-brown">私たちについて</h2>
+      <div class="w-12 h-px bg-primary-brown mx-auto mt-6"></div>
+    </div>
+
+    <div data-fade class="bg-white p-8 md:p-12 rounded-sm shadow-xl shadow-black/5">
+      <p class="font-serif text-xl md:text-2xl text-center leading-loose mb-12 text-primary-brown border-b border-primary-brown/10 pb-12">
+        「一棟入魂」。<br>
+        お客様の人生に寄り添い、<br>
+        100年続く住まいを目指します。
+      </p>
+
+      <dl class="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-x-8 gap-y-6 text-sm md:text-base">
+
+        <dt class="text-text-muted tracking-widest flex items-center gap-2">
+          会社名
+          <span class="flex-1 border-b border-dotted border-gray-300 hidden md:block ml-2"></span>
+        </dt>
+        <dd class="font-medium text-primary-brown">〇〇建築株式会社</dd>
+
+        <dt class="text-text-muted tracking-widest flex items-center gap-2">
+          代表者
+          <span class="flex-1 border-b border-dotted border-gray-300 hidden md:block ml-2"></span>
+        </dt>
+        <dd class="font-medium text-primary-brown">代表取締役　〇〇 太郎</dd>
+
+        <dt class="text-text-muted tracking-widest flex items-center gap-2">
+          設立
+          <span class="flex-1 border-b border-dotted border-gray-300 hidden md:block ml-2"></span>
+        </dt>
+        <dd class="font-medium text-primary-brown">昭和〇〇年〇月</dd>
+
+        <dt class="text-text-muted tracking-widest flex items-center gap-2">
+          所在地
+          <span class="flex-1 border-b border-dotted border-gray-300 hidden md:block ml-2"></span>
+        </dt>
+        <dd class="font-medium text-primary-brown leading-relaxed">
+          〒000-0000　〇〇県〇〇市〇〇 1-2-3
+        </dd>
+
+        <dt class="text-text-muted tracking-widest flex items-center gap-2">
+          電話番号
+          <span class="flex-1 border-b border-dotted border-gray-300 hidden md:block ml-2"></span>
+        </dt>
+        <dd class="font-medium text-primary-brown">000-0000-0000</dd>
+
+        <dt class="text-text-muted tracking-widest flex items-center gap-2">
+          営業時間
+          <span class="flex-1 border-b border-dotted border-gray-300 hidden md:block ml-2"></span>
+        </dt>
+        <dd class="font-medium text-primary-brown">9:00 〜 18:00（土日祝定休）</dd>
+
+      </dl>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     アクセスセクション
+════════════════════════════════════════ -->
+<section id="access" class="py-24 bg-white px-6">
+  <div class="max-w-5xl mx-auto">
+
+    <div data-fade class="text-center mb-16">
+      <span class="text-accent-green text-xs font-bold tracking-[0.2em] uppercase block mb-3">Access</span>
+      <h2 class="font-serif text-3xl md:text-4xl text-primary-brown">アクセス</h2>
+      <div class="w-12 h-px bg-primary-brown mx-auto mt-6"></div>
+    </div>
+
+    <div data-fade class="grid md:grid-cols-[1fr_350px] gap-8 bg-primary-light/30 border border-primary-brown/10 p-4 rounded-sm">
+
+      <!-- マップエリア（Googleマップ埋め込みコードを <iframe> で差し替えてください） -->
+      <div class="bg-gray-200 w-full min-h-[300px] md:h-full rounded relative flex justify-center items-center overflow-hidden">
+        <div class="map-grid absolute inset-0 opacity-10" aria-hidden="true"></div>
+        <div class="z-10 flex flex-col items-center text-text-muted/60">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <p class="mt-2 text-sm tracking-widest">Google Maps 埋め込みエリア</p>
+        </div>
+        <!--
+          実際の Google マップ埋め込み例：
+          <iframe
+            src="https://www.google.com/maps/embed?pb=..."
+            width="100%" height="100%"
+            style="border:0;position:absolute;inset:0;"
+            allowfullscreen loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        -->
+      </div>
+
+      <!-- 所在地情報 -->
+      <div class="flex flex-col justify-center p-6 bg-white rounded border border-primary-brown/5 shadow-sm">
+        <h3 class="font-serif text-lg text-primary-brown mb-4">〇〇建築株式会社 本社</h3>
+        <p class="text-sm text-text-muted leading-relaxed mb-6">
+          〒000-0000<br>
+          〇〇県〇〇市〇〇 1-2-3
+        </p>
+        <ul class="text-sm text-text-main space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="text-accent-green mt-0.5" aria-hidden="true">•</span>
+            <span><strong>最寄り駅：</strong><br>〇〇駅より徒歩10分</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-accent-green mt-0.5" aria-hidden="true">•</span>
+            <span><strong>駐車場：</strong><br>5台完備（無料）</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════
+     お問い合わせセクション
+════════════════════════════════════════ -->
+<section id="contact" class="py-24 bg-primary-brown px-6 text-primary-light">
+  <div class="max-w-3xl mx-auto">
+
+    <div data-fade class="text-center mb-16">
+      <span class="text-primary-light/60 text-xs font-bold tracking-[0.2em] uppercase block mb-3">Contact</span>
+      <h2 class="font-serif text-3xl md:text-4xl text-primary-light">お問い合わせ・資料請求</h2>
+      <div class="w-12 h-px bg-primary-light/30 mx-auto mt-6"></div>
+      <p class="mt-8 text-primary-light/80 text-sm">家づくりに関するご相談から、資料請求までお気軽にお問い合わせください。</p>
+    </div>
+
+    <!-- 送信完了メッセージ -->
+    <div id="form-success" class="mb-8 p-5 bg-accent-green/20 border border-accent-green/40 rounded-sm text-center" role="alert">
+      <p class="font-serif text-lg text-primary-light mb-1">送信が完了しました。</p>
+      <p class="text-sm text-primary-light/80">数日以内に担当者よりご返信いたします。</p>
+    </div>
+
+    <div data-fade>
+      <form id="contact-form" class="bg-primary-light text-text-main p-8 md:p-12 rounded-sm shadow-xl" novalidate>
+        <div class="space-y-8">
+
+          <!-- お名前 -->
+          <div>
+            <label for="name" class="block text-sm font-bold tracking-widest mb-2">
+              お名前 <span class="text-red-500 ml-1">*</span>
+            </label>
+            <input
+              type="text" id="name" name="name" required
+              class="w-full bg-white border border-gray-300 px-4 py-3 rounded-sm focus:outline-none focus:border-accent-green focus:ring-1 focus:ring-accent-green transition-all"
+              placeholder="山田 太郎"
+            >
+          </div>
+
+          <!-- メール・電話 -->
+          <div class="grid md:grid-cols-2 gap-8">
+            <div>
+              <label for="email" class="block text-sm font-bold tracking-widest mb-2">
+                メールアドレス <span class="text-red-500 ml-1">*</span>
+              </label>
+              <input
+                type="email" id="email" name="email" required
+                class="w-full bg-white border border-gray-300 px-4 py-3 rounded-sm focus:outline-none focus:border-accent-green focus:ring-1 focus:ring-accent-green transition-all"
+                placeholder="example@test.com"
+              >
+            </div>
+            <div>
+              <label for="phone" class="block text-sm font-bold tracking-widest mb-2">電話番号</label>
+              <input
+                type="tel" id="phone" name="phone"
+                class="w-full bg-white border border-gray-300 px-4 py-3 rounded-sm focus:outline-none focus:border-accent-green focus:ring-1 focus:ring-accent-green transition-all"
+                placeholder="000-0000-0000"
+              >
+            </div>
+          </div>
+
+          <!-- ご相談内容 -->
+          <div>
+            <span class="block text-sm font-bold tracking-widest mb-3">ご相談内容（複数選択可）</span>
+            <div class="flex flex-wrap gap-6">
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="inquiry" value="新築・注文住宅" class="w-4 h-4 border-gray-300 rounded">
+                <span class="text-sm group-hover:text-accent-green transition-colors">新築・注文住宅</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="inquiry" value="リフォーム・リノベーション" class="w-4 h-4 border-gray-300 rounded">
+                <span class="text-sm group-hover:text-accent-green transition-colors">リフォーム・リノベーション</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="inquiry" value="資料請求のみ" class="w-4 h-4 border-gray-300 rounded">
+                <span class="text-sm group-hover:text-accent-green transition-colors">資料請求のみ</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="inquiry" value="その他" class="w-4 h-4 border-gray-300 rounded">
+                <span class="text-sm group-hover:text-accent-green transition-colors">その他</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- メッセージ -->
+          <div>
+            <label for="message" class="block text-sm font-bold tracking-widest mb-2">
+              メッセージ本文 <span class="text-red-500 ml-1">*</span>
+            </label>
+            <textarea
+              id="message" name="message" rows="5" required
+              class="w-full bg-white border border-gray-300 px-4 py-3 rounded-sm focus:outline-none focus:border-accent-green focus:ring-1 focus:ring-accent-green transition-all resize-y"
+              placeholder="ご質問やご要望をご自由にお書きください。"
+            ></textarea>
+          </div>
+
+          <!-- 送信ボタン -->
+          <div class="pt-4 text-center">
+            <button
+              type="submit"
+              class="w-full md:w-auto px-16 py-4 bg-accent-green border border-accent-green text-white font-bold tracking-widest rounded-sm hover:bg-white hover:text-accent-green transition-all duration-300 shadow-lg shadow-accent-green/20"
+            >
+              送信する
+            </button>
+            <p class="mt-4 text-xs text-text-muted">※送信後、数日以内に担当者よりご返信いたします。</p>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+  </div>
+</section>
+
+</main><!-- /main -->
+
+
+<!-- ════════════════════════════════════════
+     フッター
+════════════════════════════════════════ -->
+<footer class="bg-[#4a3f36] text-primary-light/60 py-12 px-6 border-t border-white/5">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="text-xl font-serif tracking-widest text-primary-light">
+      〇〇建築株式会社
+    </div>
+    <div class="flex flex-wrap justify-center gap-6 text-sm">
+      <span class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.92 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.84 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1-1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/>
+        </svg>
+        000-0000-0000
+      </span>
+      <span class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+          <rect width="20" height="16" x="2" y="4" rx="2"/>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+        info@example.com
+      </span>
+    </div>
+  </div>
+  <div class="mt-12 text-xs tracking-widest text-center">
+    &copy; 2026 〇〇 Construction All Rights Reserved.
+  </div>
+</footer>
+
+
+<!-- ════════════════════════════════════════
+     JavaScript
+════════════════════════════════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ── モバイルメニュー ────────────────────────────────
+  const menuBtn   = document.getElementById('menu-btn');
+  const mobileNav = document.getElementById('mobile-nav');
+  const iconMenu  = document.getElementById('icon-menu');
+  const iconClose = document.getElementById('icon-close');
+
+  function closeMobileMenu() {
+    mobileNav.classList.remove('open');
+    iconMenu.classList.remove('hidden');
+    iconClose.classList.add('hidden');
+    menuBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  menuBtn?.addEventListener('click', () => {
+    const isOpen = mobileNav.classList.contains('open');
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      mobileNav.classList.add('open');
+      iconMenu.classList.add('hidden');
+      iconClose.classList.remove('hidden');
+      menuBtn.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  mobileNav?.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', closeMobileMenu);
+  });
+
+
+  // ── スクロールアニメーション（Intersection Observer）──
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { rootMargin: '-80px 0px', threshold: 0 }
+  );
+
+  document.querySelectorAll('[data-fade]').forEach(el => observer.observe(el));
+
+
+  // ── ヒーローアニメーション（即時） ──────────────────
+  requestAnimationFrame(() => {
+    document.querySelectorAll('[data-hero-text], [data-hero-img]').forEach(el => {
+      el.classList.add('visible');
+    });
+  });
+
+
+  // ── スムーススクロール ───────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', e => {
+      const id = anchor.getAttribute('href').slice(1);
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      e.preventDefault();
+      const offset = document.querySelector('header')?.offsetHeight ?? 80;
+      window.scrollTo({
+        top: target.getBoundingClientRect().top + window.scrollY - offset,
+        behavior: 'smooth'
+      });
+    });
+  });
+
+
+  // ── お問い合わせフォーム ─────────────────────────────
+  const form    = document.getElementById('contact-form');
+  const success = document.getElementById('form-success');
+
+  form?.addEventListener('submit', e => {
+    e.preventDefault();
+
+    // 簡易バリデーション
+    const name    = form.querySelector('#name').value.trim();
+    const email   = form.querySelector('#email').value.trim();
+    const message = form.querySelector('#message').value.trim();
+
+    if (!name || !email || !message) {
+      // 未入力フィールドをハイライト
+      [{ id: 'name', val: name }, { id: 'email', val: email }, { id: 'message', val: message }].forEach(({ id, val }) => {
+        const el = form.querySelector('#' + id);
+        if (!val) {
+          el.classList.add('border-red-400', 'ring-1', 'ring-red-400');
+          el.addEventListener('input', () => el.classList.remove('border-red-400', 'ring-1', 'ring-red-400'), { once: true });
+        }
+      });
+      return;
+    }
+
+    // 送信成功（スタンドアロン版: 実際の送信は行いません）
+    form.reset();
+    success.classList.add('show');
+    success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // 5秒後に非表示
+    setTimeout(() => success.classList.remove('show'), 5000);
+  });
+
+});
+</script>
+
+</body>
+</html>
